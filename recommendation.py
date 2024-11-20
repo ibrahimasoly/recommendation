@@ -81,7 +81,11 @@ def recuperer_genres(id):
         d = []
         for i in np.array(df_pd).tolist():
             d.append(i[0].tolist())
-    return d
+    if d==[]:
+        return "artist n'exist pas"
+    else:
+        return d
+
 
 
 def recommandation_systeme(genre_nname):
