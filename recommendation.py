@@ -81,10 +81,7 @@ def recuperer_genres(id):
         d = []
         for i in np.array(df_pd).tolist():
             d.append(i[0].tolist())
-    if d==[]:
-        return "artist n'exist pas"
-    else:
-        return d
+    return d
 
 
 
@@ -140,7 +137,7 @@ if st.button('Chercher'):
                     else:
                         image_url = "https://via.placeholder.com/150"  # Image par défaut
 
-                    st.image(image_url)
+                    st.image(image_url,  width=150)
                     st.subheader(recommendation["name"])
                     st.write(f"Popularité : {recommendation['popularity']}")
                     st.markdown(
