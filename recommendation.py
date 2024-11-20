@@ -137,7 +137,7 @@ if st.button('Chercher'):
                     else:
                         image_url = "https://via.placeholder.com/150"  # Image par défaut
 
-                    st.image(image_url,  width=150)
+                    st.image(image_url,  width=450)
                     st.subheader(recommendation["name"])
                     st.write(f"Popularité : {recommendation['popularity']}")
                     st.markdown(
