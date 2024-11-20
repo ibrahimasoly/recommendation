@@ -16,7 +16,7 @@ client_credentials_manager = SpotifyClientCredentials(client_id=client_id, clien
 sp = Spotify(client_credentials_manager=client_credentials_manager)
 
 # Charger le jeu de données (supposons qu'il soit au format CSV)
-df = pd.read_csv("data/data_by_genres.csv")
+df = pd.read_csv("data_by_genres.csv")
 data=df.drop('genres', axis=1)
 feature=['mode','acousticness','danceability','duration_ms','energy','instrumentalness','liveness','loudness','speechiness','mode','tempo','valence','popularity','key']
 scaler = StandardScaler()
