@@ -6,17 +6,18 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.cluster import KMeans
 from spotipy import Spotify
 from spotipy.oauth2 import SpotifyClientCredentials
-
+import os
 
 # Initialisation de Spotipy pour accéder à l'API Spotify
-client_id = '72b5c4ca6a104dda8d97bef4f0af925b'
-client_secret = '1e2acb2be69f4ac58d564c25aa30dca8'
+client_id = os.environ.get("SPOTIFY_CLIENT_ID")
+client_secret = os.environ.get("SPOTIFY_CLIENT_SECRET")
+
 
 client_credentials_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
 sp = Spotify(client_credentials_manager=client_credentials_manager)
 
 # Charger le jeu de données (supposons qu'il soit au format CSV)
-df = pd.read_csv("data_by_genres.csv")
+df = pd.read_csv("data/data_by_genres.csv")
 data=df.drop('genres', axis=1)
 feature=['mode','acousticness','danceability','duration_ms','energy','instrumentalness','liveness','loudness','speechiness','mode','tempo','valence','popularity','key']
 scaler = StandardScaler()
