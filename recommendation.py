@@ -22,7 +22,7 @@ data=df.drop('genres', axis=1)
 feature=['mode','acousticness','danceability','duration_ms','energy','instrumentalness','liveness','loudness','speechiness','mode','tempo','valence','popularity','key']
 scaler = StandardScaler()
 dataScaler = scaler.fit_transform(data[feature])
-model = KMeans(n_clusters=10)
+model = KMeans(n_clusters=10,verbose=1)
 df['label'] = model.fit_predict(dataScaler)
 
 # Fonction pour chercher les genres
