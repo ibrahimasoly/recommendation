@@ -17,7 +17,7 @@ client_credentials_manager = SpotifyClientCredentials(client_id=client_id, clien
 sp = Spotify(client_credentials_manager=client_credentials_manager)
 
 # Charger le jeu de données (supposons qu'il soit au format CSV)
-df = pd.read_csv("data_by_genres.csv")
+df = pd.read_csv("data/data_by_genres.csv")
 data=df.drop('genres', axis=1)
 feature=['mode','acousticness','danceability','duration_ms','energy','instrumentalness','liveness','loudness','speechiness','mode','tempo','valence','popularity','key']
 scaler = StandardScaler()
@@ -49,7 +49,7 @@ def search_genres_ByNameArtist(track_name, artist_name):
 
 # Fonction pour chercher un artiste
 def search_artist_ByGenre(genre_name):
-    results = sp.search(q=f"genre:{genre_name}", type="artist", limit=2)
+    results = sp.search(q=f"genre:{genre_name}", type="artist", limit=10)
     a=[]
     for artist in results['artists']['items']:
         a.append(artist)
@@ -108,42 +108,41 @@ def get_track_preview(track_name):
 
 
 st.title('Recommandation Musical')
-nom_artist = st.text_input("", placeholder="Donnez le nom de votre artiste")
 titre_chansons = st.text_input("", placeholder="Donnez le titre du chanson")
+nom_artist = st.text_input("", placeholder="Donnez le nom de votre artiste")
 
 if st.button('Chercher') and titre_chansons and nom_artist:
-    recommendation = recuperer_genres(nom_artist,titre_chansons)
-    # Définir le nombre de colonnes
-    num_cols = 2
+    recommendation = recuperer_genres(titre_chansons,nom_artist)
+    for genre in recommendation:
+        artists=recommandation_systeme(genre)
+        # Définir le nombre de colonnes
+        num_cols = 2
 
-    # Diviser la liste en groupes selon le nombre de colonnes
-    rows = [recommendation[i:i + num_cols] for i in range(0, len(recommendation), num_cols)]
-    for row in rows:
-        cols = st.columns(num_cols)
-        for col, item in zip(cols, row):
-            with col:
-                # Vérifier la présence d'images
-                if recommendation.get("images") and len(recommendation["images"]) > 1:
-                    image_url = recommendation["images"][1]["url"]
-                elif recommendation.get("images") and len(recommendation["images"]) > 0:
-                    image_url = recommendation["images"][0]["url"]
-                else:
-                    image_url = "https://via.placeholder.com/150"  # Image par défaut
+        # Diviser la liste en groupes selon le nombre de colonnes
+        rows = [artists[i:i + num_cols] for i in range(0, len(artists), num_cols)]
+        for row in rows:
+            cols = st.columns(num_cols)
+            for col, artist in zip(cols, row):
+                with col:
+                    # Vérifier la présence d'images
+                    if artist.get("images") and len(artist["images"]) > 1:
+                        image_url = artist["images"][1]["url"]
+                    elif artist.get("images") and len(artist["images"]) > 0:
+                        image_url = artist["images"][0]["url"]
+                    else:
+                        image_url = "https://via.placeholder.com/150"  # Image par défaut
 
-                st.image(image_url)
-                st.subheader(recommendation["name"])
-                st.write(f"Popularité : {recommendation['popularity']}")
-                st.markdown(
-                    f'<a href="{recommendation['spotify']}" target="_blank" style="text-decoration: none; color: green; font-size: 18px;">Écoutez {recommendation["name"]} sur Spotify</a>',
-                    unsafe_allow_html=True
-                )
+                    st.image(image_url)
+                    st.subheader(artist["name"])
+                    st.write(f"Popularité : {artist['popularity']}")
+                    st.markdown(
+                        f'<a href="{artist['spotify']}" target="_blank" style="text-decoration: none; color: green; font-size: 18px;">Écoutez {artist["name"]} sur Spotify</a>',
+                        unsafe_allow_html=True
+                    )
 
-                # Ajouter l'audio si disponible
-                track_info = get_track_preview(recommendation['name'])
-                if track_info and track_info['preview_url']:
-                    st.audio(track_info['preview_url'], format="audio/mp3")
-                else:
-                    st.write("")
-
-
-
+                    # Ajouter l'audio si disponible
+                    track_info = get_track_preview(artist['name'])
+                    if track_info and track_info['preview_url']:
+                        st.audio(track_info['preview_url'], format="audio/mp3")
+                    else:
+                        st.write("")
