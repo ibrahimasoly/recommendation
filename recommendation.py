@@ -17,7 +17,7 @@ client_credentials_manager = SpotifyClientCredentials(client_id=client_id, clien
 sp = Spotify(client_credentials_manager=client_credentials_manager)
 
 # Charger le jeu de données (supposons qu'il soit au format CSV)
-df = pd.read_csv("data_by_genres.csv")
+df = pd.read_csv("data/data_by_genres.csv")
 data=df.drop('genres', axis=1)
 feature=['mode','acousticness','danceability','duration_ms','energy','instrumentalness','liveness','loudness','speechiness','mode','tempo','valence','popularity','key']
 scaler = StandardScaler()
@@ -84,7 +84,6 @@ def recuperer_genres(id):
     return d
 
 
-
 def recommandation_systeme(genre_nname):
     artists=search_artist_ByGenre(genre_nname)
     return [{
@@ -126,7 +125,7 @@ if st.button('Chercher'):
         if not k:
             st.write("")
         else:
-            cols = st.columns(len(k))
+            cols = st.columns(2)
             for col, recommendation in zip(cols, k):
                 with col:
                     # Vérifier la présence d'images
@@ -137,7 +136,7 @@ if st.button('Chercher'):
                     else:
                         image_url = "https://via.placeholder.com/150"  # Image par défaut
 
-                    st.image(image_url,  width=450)
+                    st.image(image_url)
                     st.subheader(recommendation["name"])
                     st.write(f"Popularité : {recommendation['popularity']}")
                     st.markdown(
