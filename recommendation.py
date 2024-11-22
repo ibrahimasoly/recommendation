@@ -26,13 +26,25 @@ model = KMeans(n_clusters=10,verbose=1)
 df['label'] = model.fit_predict(dataScaler)
 
 # Fonction pour chercher les genres
-def search_genres_ByNameArtist(artist_name):
-    results = sp.search(q=artist_name, type='artist', limit=1)
-    if results['artists']['items']:
-        artist = results['artists']['items'][0]
-        return artist['genres']
+def search_genres_ByNameArtist(track_name, artist_name):
+    # Rechercher la piste par titre et artiste
+    results = sp.search(q=f"track:{track_name} artist:{artist_name}", type='track', limit=1)
+    
+    if results['tracks']['items']:
+        # Récupérer l'artiste principal de la piste
+        artist_id = results['tracks']['items'][0]['artists'][0]['id']
+        
+        # Récupérer les détails de l'artiste
+        artist = sp.artist(artist_id)
+        genres = artist.get('genres', [])
+        
+        if genres:
+            return genres[0]  # Retourner le premier genre associé
+        else:
+            return "Genre non disponible"
     else:
-        return None
+        return "Chanson ou artiste introuvable"
+
     
 
 # Fonction pour chercher un artiste
@@ -65,23 +77,10 @@ def recommandation_genres(nom_genre, k=5):
         return recommend_genre[1:k+1].values
 
 
-def recuperer_genres(id):
-    genres = search_genres_ByNameArtist(id)
-    if genres and len(genres) > 1:
-        genres1 = []  # Liste pour stocker les recommandations
-        genre1 = []  # Liste pour stocker les genres d'entrée
-
-        # Obtenir les recommandations pour chaque genre
-        for genre in genres:
-            recommended_genres = recommandation_genres(genre, k=4)
-            genres1.append([recommended_genres]) 
-            genre1.append(genre)
-        df_pd= pd.DataFrame(genres1)
-        df_pd.dropna(inplace=True)
-        d = []
-        for i in np.array(df_pd).tolist():
-            d.append(i[0].tolist())
-    return d
+def recuperer_genres(nom_artist, titre):
+    genre = search_genres_ByNameArtist(nom_artist,titre)
+    recommended_genres = recommandation_genres(genre, k=4)
+    return recommended_genres.tolist()
 
 
 def recommandation_systeme(genre_nname):
@@ -109,47 +108,42 @@ def get_track_preview(track_name):
 
 
 st.title('Recommandation Musical')
-id = st.text_input("", placeholder="Donnez le nom de votre artiste")
+nom_artist = st.text_input("", placeholder="Donnez le nom de votre artiste")
+titre_chansons = st.text_input("", placeholder="Donnez le nom de votre artiste")
 
 if st.button('Chercher'):
-    recom = recuperer_genres(id)
-    for i in recom:
-        k = []
-        for j in i:
-            recommendations = recommandation_systeme([j])
-            if isinstance(recommendations, list):  # Si c'est une liste
-                k.extend(recommendations)
-            else:  # Si c'est un objet ou une chaîne
-                k.append(recommendations)
+    recommendation = recuperer_genres(id)
+    # Définir le nombre de colonnes
+    num_cols = 2
 
-        if not k:
-            st.write("")
-        else:
-            cols = st.columns(3)
-            for col, recommendation in zip(cols, k):
-                with col:
-                    # Vérifier la présence d'images
-                    if recommendation.get("images") and len(recommendation["images"]) > 1:
-                        image_url = recommendation["images"][1]["url"]
-                    elif recommendation.get("images") and len(recommendation["images"]) > 0:
-                        image_url = recommendation["images"][0]["url"]
-                    else:
-                        image_url = "https://via.placeholder.com/150"  # Image par défaut
+    # Diviser la liste en groupes selon le nombre de colonnes
+    rows = [recommendation[i:i + num_cols] for i in range(0, len(recommendation), num_cols)]
+    for row in rows:
+        cols = st.columns(num_cols)
+        for col, item in zip(cols, row):
+            with col:
+                # Vérifier la présence d'images
+                if recommendation.get("images") and len(recommendation["images"]) > 1:
+                    image_url = recommendation["images"][1]["url"]
+                elif recommendation.get("images") and len(recommendation["images"]) > 0:
+                    image_url = recommendation["images"][0]["url"]
+                else:
+                    image_url = "https://via.placeholder.com/150"  # Image par défaut
 
-                    st.image(image_url)
-                    st.subheader(recommendation["name"])
-                    st.write(f"Popularité : {recommendation['popularity']}")
-                    st.markdown(
-                        f'<a href="{recommendation['spotify']}" target="_blank" style="text-decoration: none; color: green; font-size: 18px;">Écoutez {recommendation["name"]} sur Spotify</a>',
-                        unsafe_allow_html=True
-                    )
+                st.image(image_url)
+                st.subheader(recommendation["name"])
+                st.write(f"Popularité : {recommendation['popularity']}")
+                st.markdown(
+                    f'<a href="{recommendation['spotify']}" target="_blank" style="text-decoration: none; color: green; font-size: 18px;">Écoutez {recommendation["name"]} sur Spotify</a>',
+                    unsafe_allow_html=True
+                )
 
-                    # Ajouter l'audio si disponible
-                    track_info = get_track_preview(recommendation['name'])
-                    if track_info and track_info['preview_url']:
-                        st.audio(track_info['preview_url'], format="audio/mp3")
-                    else:
-                        st.write("")
+                # Ajouter l'audio si disponible
+                track_info = get_track_preview(recommendation['name'])
+                if track_info and track_info['preview_url']:
+                    st.audio(track_info['preview_url'], format="audio/mp3")
+                else:
+                    st.write("")
 
 
 
