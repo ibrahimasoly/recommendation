@@ -111,8 +111,8 @@ st.title('Recommandation Musical')
 nom_artist = st.text_input("", placeholder="Donnez le nom de votre artiste")
 titre_chansons = st.text_input("", placeholder="Donnez le nom de votre artiste")
 
-if st.button('Chercher'):
-    recommendation = recuperer_genres(id)
+if st.button('Chercher') and titre_chansons and nom_artist:
+    recommendation = recuperer_genres(nom_artist,titre_chansons)
     # Définir le nombre de colonnes
     num_cols = 2
 
