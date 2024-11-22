@@ -109,7 +109,7 @@ def get_track_preview(track_name):
 
 st.title('Recommandation Musical')
 nom_artist = st.text_input("", placeholder="Donnez le nom de votre artiste")
-titre_chansons = st.text_input("", placeholder="Donnez le nom de votre artiste")
+titre_chansons = st.text_input("", placeholder="Donnez le titre du chanson")
 
 if st.button('Chercher') and titre_chansons and nom_artist:
     recommendation = recuperer_genres(nom_artist,titre_chansons)
