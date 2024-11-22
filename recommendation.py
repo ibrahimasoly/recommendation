@@ -125,7 +125,7 @@ if st.button('Chercher'):
         if not k:
             st.write("")
         else:
-            cols = st.columns(2)
+            cols = st.columns(3)
             for col, recommendation in zip(cols, k):
                 with col:
                     # Vérifier la présence d'images
